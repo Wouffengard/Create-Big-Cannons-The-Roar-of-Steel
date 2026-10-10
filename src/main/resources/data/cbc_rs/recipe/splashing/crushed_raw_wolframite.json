@@ -1,0 +1,22 @@
+{
+  "type": "create:splashing",
+  "ingredients": [
+    {
+      "item": "cbc_rs:crushed_raw_wolframite"
+    }
+  ],
+  "results": [
+    {
+      "count": 9,
+      "id": "cbc_rs:tungsten_nugget"
+    },
+    {
+      "chance": 0.15,
+      "id": "minecraft:iron_nugget"
+    },
+    {
+      "chance": 0.02,
+      "id": "create:rose_quartz"
+    }
+  ]
+}

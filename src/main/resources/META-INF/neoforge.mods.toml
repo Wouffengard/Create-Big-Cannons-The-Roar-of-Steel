@@ -1,0 +1,126 @@
+modLoader = "javafml"
+loaderVersion = "${loader_version_range}"
+license = "${mod_license}"
+# issueTrackerURL = "${mod_issues}"
+
+[[mods]]
+modId = "${mod_id}"
+version = "${mod_version}"
+displayName = "${mod_name}"
+# Phase 0 ships without an icon. Add src/main/resources/icon.png (128x128)
+# and uncomment the next line before the first release.
+# logoFile = "icon.png"
+authors = "${mod_authors}"
+description = '''
+${mod_name}
+
+${mod_description}
+
+Resource namespace: cbc_rs
+
+Localized display names live in assets/cbc_rs/lang/ (zh_cn and en_us);
+this file is intentionally ASCII-only. See README section 3a.
+'''
+
+# =====================================================================
+#  Dependencies
+#
+#  NeoForge and Minecraft are hard requirements.
+#  Create, Ritchie's Projectile Library and Create Big Cannons are declared
+#  required because every planned feature builds on them.
+#  The remaining CBC companions stay optional, mirroring how Create Big
+#  Cannons itself declares them.
+# =====================================================================
+
+[[dependencies.${mod_id}]]
+modId = "neoforge"
+type = "required"
+versionRange = "${neo_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "minecraft"
+type = "required"
+versionRange = "${minecraft_version_range}"
+ordering = "NONE"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "create"
+type = "required"
+versionRange = "${create_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "ritchiesprojectilelib"
+type = "required"
+versionRange = "${rpl_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "createbigcannons"
+type = "required"
+versionRange = "${cbc_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "sable"
+type = "optional"
+versionRange = "${sable_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "aeronautics"
+type = "optional"
+versionRange = "${aeronautics_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "simulated"
+type = "optional"
+versionRange = "${simulated_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "offroad"
+type = "optional"
+versionRange = "${offroad_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "copycats"
+type = "optional"
+versionRange = "${copycats_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "framedblocks"
+type = "optional"
+versionRange = "${framedblocks_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+[[dependencies.${mod_id}]]
+modId = "curios"
+type = "optional"
+versionRange = "${curios_version_range}"
+ordering = "AFTER"
+side = "BOTH"
+
+# =====================================================================
+#  Mixin configurations
+# =====================================================================
+[[mixins]]
+config = "cbc_rs.mixins.json"
+
+[[mixins]]
+config = "cbc_rs.client.mixins.json"

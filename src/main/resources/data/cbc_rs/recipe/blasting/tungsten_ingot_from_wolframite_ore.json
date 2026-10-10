@@ -1,0 +1,14 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 100,
+  "experience": 1.0,
+  "group": "tungsten_ingot",
+  "ingredient": {
+    "item": "cbc_rs:wolframite_ore"
+  },
+  "result": {
+    "count": 1,
+    "id": "cbc_rs:tungsten_ingot"
+  }
+}

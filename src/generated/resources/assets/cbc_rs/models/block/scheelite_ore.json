@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "cbc_rs:block/scheelite_ore"
+  }
+}

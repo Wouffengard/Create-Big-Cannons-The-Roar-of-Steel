@@ -1,0 +1,7 @@
+{
+  "replace": false,
+  "values": [
+    "cbc_rs:crushed_raw_scheelite",
+    "cbc_rs:crushed_raw_wolframite"
+  ]
+}

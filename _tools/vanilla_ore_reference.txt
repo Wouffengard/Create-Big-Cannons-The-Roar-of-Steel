@@ -1,0 +1,180 @@
+Vanilla ore-generation reference - Minecraft 1.21.1 / NeoForge 21.1.228
+Source: decompiled sources in the local Gradle cache
+        sourcesAndCompiledWithNeoForge_0e0bd824dfbac396917cd50fe613feb3d9366c00_output.jar
+Cited by: 机械动力火炮附属开发大纲_可行性报告_v4.docx section 9.11 (design decision 15)
+
+Lapis is scheelite's template; gold is wolframite's template.
+
+==============================================================================
+OreFeatures.java - shared RuleTests
+==============================================================================
+   50|         RuleTest ruletest = new TagMatchTest(BlockTags.BASE_STONE_OVERWORLD);
+   51|         RuleTest ruletest1 = new TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES);
+   52|         RuleTest ruletest2 = new TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES);
+   53|         RuleTest ruletest3 = new BlockMatchTest(Blocks.NETHERRACK);
+   54|         RuleTest ruletest4 = new TagMatchTest(BlockTags.BASE_STONE_NETHER);
+
+==============================================================================
+OreFeatures.java - target lists (list1 = gold, list3 = lapis)
+==============================================================================
+   59|         List<OreConfiguration.TargetBlockState> list1 = List.of(
+   60|             OreConfiguration.target(ruletest1, Blocks.GOLD_ORE.defaultBlockState()),
+   61|             OreConfiguration.target(ruletest2, Blocks.DEEPSLATE_GOLD_ORE.defaultBlockState())
+   62|         );
+
+   67|         List<OreConfiguration.TargetBlockState> list3 = List.of(
+   68|             OreConfiguration.target(ruletest1, Blocks.LAPIS_ORE.defaultBlockState()),
+   69|             OreConfiguration.target(ruletest2, Blocks.DEEPSLATE_LAPIS_ORE.defaultBlockState())
+   70|         );
+
+==============================================================================
+OreFeatures.java - configured features (vein size / air-exposure rule)
+==============================================================================
+   95|         FeatureUtils.register(p_321573_, ORE_GOLD, Feature.ORE, new OreConfiguration(list1, 9));
+   96|         FeatureUtils.register(p_321573_, ORE_GOLD_BURIED, Feature.ORE, new OreConfiguration(list1, 9, 0.5F));
+  113|         FeatureUtils.register(p_321573_, ORE_LAPIS, Feature.ORE, new OreConfiguration(list3, 7));
+  114|         FeatureUtils.register(p_321573_, ORE_LAPIS_BURIED, Feature.ORE, new OreConfiguration(list3, 7, 1.0F));
+
+==============================================================================
+OrePlacements.java - placement (count / height range)
+==============================================================================
+  182|         PlacementUtils.register(
+  183|             p_321719_,
+  184|             ORE_GOLD_EXTRA,
+  185|             holder16,
+  186|             commonOrePlacement(50, HeightRangePlacement.uniform(VerticalAnchor.absolute(32), VerticalAnchor.absolute(256)))
+  187|         );
+
+  188|         PlacementUtils.register(
+  189|             p_321719_, ORE_GOLD, holder17, commonOrePlacement(4, HeightRangePlacement.triangle(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(32)))
+  190|         );
+
+  191|         PlacementUtils.register(
+  192|             p_321719_,
+  193|             ORE_GOLD_LOWER,
+  194|             holder17,
+  195|             orePlacement(CountPlacement.of(UniformInt.of(0, 1)), HeightRangePlacement.uniform(VerticalAnchor.absolute(-64), VerticalAnchor.absolute(-48)))
+  196|         );
+
+  230|         PlacementUtils.register(
+  231|             p_321719_, ORE_LAPIS, holder23, commonOrePlacement(2, HeightRangePlacement.triangle(VerticalAnchor.absolute(-32), VerticalAnchor.absolute(32)))
+  232|         );
+
+  233|         PlacementUtils.register(
+  234|             p_321719_, ORE_LAPIS_BURIED, holder24, commonOrePlacement(4, HeightRangePlacement.uniform(VerticalAnchor.bottom(), VerticalAnchor.absolute(64)))
+  235|         );
+
+==============================================================================
+OrePlacements.java - helper semantics
+==============================================================================
+   64|         return List.of(p_195347_, InSquarePlacement.spread(), p_195348_, BiomeFilter.biome());
+   67|     private static List<PlacementModifier> commonOrePlacement(int p_195344_, PlacementModifier p_195345_) {
+   68|         return orePlacement(CountPlacement.of(p_195344_), p_195345_);
+   71|     private static List<PlacementModifier> rareOrePlacement(int p_195350_, PlacementModifier p_195351_) {
+   72|         return orePlacement(RarityFilter.onAverageOnceEvery(p_195350_), p_195351_);
+
+==============================================================================
+Reading notes
+==============================================================================
+
+* ruletest1 = TagMatchTest(BlockTags.STONE_ORE_REPLACEABLES)      -> stone layer
+* ruletest2 = TagMatchTest(BlockTags.DEEPSLATE_ORE_REPLACEABLES)  -> deepslate layer
+
+* Vanilla lapis targets BOTH layers (list3). Scheelite keeps only the stone
+  entry - that single-target choice is what makes scheelite stone-only.
+* Vanilla gold targets BOTH layers (list1). Wolframite keeps only the deepslate
+  entry - that single-target choice is what makes wolframite deepslate-only.
+
+* new OreConfiguration(targetList, size)                - no air-exposure rule
+* new OreConfiguration(targetList, size, discardChance) - discardChance is the
+  probability that an ore block touching air is discarded (0.5F ~= half removed).
+
+* commonOrePlacement(n, h) = orePlacement(CountPlacement.of(n), h)
+                          = [ CountPlacement.of(n), h,
+                              InSquarePlacement.spread(), BiomeFilter.biome() ]
+* rareOrePlacement(n, h) uses RarityFilter.onAverageOnceEvery(n) instead.
+
+* Consequence for wolframite: vanilla gold's ORE_GOLD_EXTRA vein (y 32..256)
+  sits in the stone layer, so with a deepslate-only target list it can never
+  place anything. Do not replicate it.
+* Vanilla gold's ORE_GOLD_LOWER (y -64..-48, CountPlacement 0..1) does sit in
+  the deepslate range and is a valid extra vein for wolframite if wanted.
+
+==============================================================================
+Decision 17 - wolframite secondary vein (this mod's value)
+==============================================================================
+
+Vanilla gold's secondary vein (ORE_GOLD_EXTRA) is uniform y 32..256, which lies
+in the STONE layer and therefore cannot place anything against a deepslate-only
+target. Decision 17 keeps the vein but tightens its height:
+
+    placed_feature 副脉: CountPlacement 10
+                         + HeightRangePlacement uniform(y -48 .. y -16)
+                         + InSquare + BiomeFilter
+
+y -48..-16 sits entirely inside the deepslate layer, so the vein actually
+produces wolframite while keeping the layer-exclusive rule intact.
+
+The count was LOWERED from vanilla's 50 to 10. Vanilla spreads its 50 attempts
+over 225 blocks of height (0.222 attempts/block); narrowed to 33 blocks the same
+count gives 1.515 attempts/block, ~7x denser, which played far too dense.
+count 10 gives 0.303 attempts/block, i.e. a main:secondary ratio of ~1:7.3
+against vanilla gold's ~1:5.4 - slightly richer than vanilla gold, as intended.
+
+==============================================================================
+Decision 17 - crushing / washing / smelting values (this mod)
+==============================================================================
+
+All templates below are copied from the real Create 6.0.10 recipe files in
+data/create/recipe/crushing/*.json and data/create/recipe/splashing/*.json.
+
+--- crushing: scheelite ore  (template: iron_ore.json) ---
+  ingredients:     [{ item: "cbc_rs:scheelite_ore" }]
+  processing_time: 250
+  results:         [ { id: cbc_rs:crushed_raw_scheelite },
+                     { chance: 0.75,  id: cbc_rs:crushed_raw_scheelite },
+                     { chance: 0.75,  id: create:experience_nugget },
+                     { chance: 0.125, id: minecraft:cobblestone } ]
+
+--- crushing: wolframite ore  (template: deepslate_iron_ore.json) ---
+  ingredients:     [{ item: "cbc_rs:wolframite_ore" }]
+  processing_time: 350
+  results:         [ { count: 2,     id: cbc_rs:crushed_raw_wolframite },
+                     { chance: 0.25,  id: cbc_rs:crushed_raw_wolframite },
+                     { chance: 0.75,  id: create:experience_nugget },
+                     { chance: 0.125, id: minecraft:cobbled_deepslate } ]
+
+--- crushing: raw ore  (template: raw_iron.json, driven by a tag) ---
+  ingredients:     [{ tag: "c:raw_materials/scheelite" }]
+  processing_time: 400
+  results:         [ { id: cbc_rs:crushed_raw_scheelite },
+                     { chance: 0.75, id: create:experience_nugget } ]
+  (wolframite side identical with c:raw_materials/wolframite)
+
+--- washing: crushed scheelite  (9 nuggets, as all vanilla crushed ores) ---
+  ingredients: [{ item: "cbc_rs:crushed_raw_scheelite" }]
+  results:     [ { count: 9, id: cbc_rs:tungsten_nugget },
+                 { chance: 0.15, id: minecraft:clay_ball } ]
+  (vanilla's closest analogue, crushed_raw_copper, uses a 50% clay ball)
+
+--- washing: crushed wolframite ---
+  ingredients: [{ item: "cbc_rs:crushed_raw_wolframite" }]
+  results:     [ { count: 9,  id: cbc_rs:tungsten_nugget },
+                 { chance: 0.15, id: minecraft:iron_nugget },
+                 { chance: 0.02, id: create:rose_quartz } ]
+
+--- smelting / blasting ---
+  Vanilla parity only: minecraft:smelting and minecraft:blasting with vanilla
+  field shapes and vanilla-like times/experience. All four inputs
+  (raw_scheelite, raw_wolframite, crushed_raw_scheelite, crushed_raw_wolframite)
+  yield the same cbc_rs:tungsten_ingot. Ore blocks, if made smeltable, follow
+  the vanilla ore convention.
+
+==============================================================================
+Note on "reference deepslate iron ore"
+==============================================================================
+
+There is no separate deepslate-iron ConfiguredFeature in vanilla. Iron uses one
+feature (ORE_IRON, vein size 9) with two targets - stone and deepslate - and the
+deepslate ore is then crushed by Create's own deepslate_iron_ore.json recipe,
+which is the file referenced above. That recipe is what "参考深层铁矿石" maps to.

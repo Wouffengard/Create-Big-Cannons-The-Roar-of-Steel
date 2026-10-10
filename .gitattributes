@@ -1,0 +1,29 @@
+# Line endings.
+#
+# core.autocrlf is enabled on this machine, which would rewrite LF -> CRLF on
+# checkout. That breaks two things here:
+#
+#   * `gradlew` is a POSIX shell script (#!/bin/sh). With CRLF the kernel cannot
+#     parse the shebang and `./gradlew` fails on Linux/macOS with
+#     "bad interpreter: No such file or directory".
+#   * JSON, lang files and Java sources are compared byte-wise by the build and
+#     by the verifier; mixed endings make diffs unreadable.
+#
+# Everything is therefore stored and checked out with LF.
+* text=auto eol=lf
+
+# Shell / Gradle wrappers must stay LF, explicitly.
+gradlew text eol=lf
+*.sh text eol=lf
+
+# Windows batch files need CRLF to run.
+*.bat text eol=crlf
+
+# Binary assets: never touch.
+*.png binary
+*.jar binary
+*.nbt binary
+*.zip binary
+
+# Generated data is diff-heavy; mark it so review stays readable.
+src/generated/resources/** linguist-generated=true

@@ -1,0 +1,27 @@
+{
+  "feature": "cbc_rs:wolframite_ore",
+  "placement": [
+    {
+      "type": "minecraft:count",
+      "count": 4
+    },
+    {
+      "type": "minecraft:height_range",
+      "height": {
+        "type": "minecraft:trapezoid",
+        "min_inclusive": {
+          "absolute": -64
+        },
+        "max_inclusive": {
+          "absolute": 32
+        }
+      }
+    },
+    {
+      "type": "minecraft:in_square"
+    },
+    {
+      "type": "minecraft:biome"
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "type": "create:crushing",
+  "ingredients": [
+    {
+      "item": "cbc_rs:scheelite_ore"
+    }
+  ],
+  "processing_time": 250,
+  "results": [
+    {
+      "id": "cbc_rs:crushed_raw_scheelite"
+    },
+    {
+      "chance": 0.75,
+      "id": "cbc_rs:crushed_raw_scheelite"
+    },
+    {
+      "chance": 0.75,
+      "id": "create:experience_nugget"
+    },
+    {
+      "chance": 0.125,
+      "id": "minecraft:cobblestone"
+    }
+  ]
+}

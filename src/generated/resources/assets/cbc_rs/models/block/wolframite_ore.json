@@ -1,0 +1,6 @@
+{
+  "parent": "minecraft:block/cube_all",
+  "textures": {
+    "all": "cbc_rs:block/wolframite_ore"
+  }
+}

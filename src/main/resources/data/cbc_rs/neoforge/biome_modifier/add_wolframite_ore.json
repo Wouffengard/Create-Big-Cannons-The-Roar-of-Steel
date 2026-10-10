@@ -1,0 +1,9 @@
+{
+  "type": "neoforge:add_features",
+  "biomes": "#minecraft:is_overworld",
+  "features": [
+    "cbc_rs:wolframite_ore_main",
+    "cbc_rs:wolframite_ore_secondary"
+  ],
+  "step": "underground_ores"
+}

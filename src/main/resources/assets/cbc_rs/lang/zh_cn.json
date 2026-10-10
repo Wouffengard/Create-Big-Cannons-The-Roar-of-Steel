@@ -1,0 +1,15 @@
+{
+  "itemGroup.cbc_rs": "机械动力火炮：钢铁轰鸣",
+  "item.cbc_rs.tungsten_ingot": "钨锭",
+  "cbc_rs.tooltip.caliber.small": "小口径",
+  "cbc_rs.tooltip.caliber.medium": "中口径",
+  "cbc_rs.tooltip.caliber.large": "大口径",
+  "cbc_rs.tooltip.spread_reducer": "只降低散布，不影响膛压。",
+  "block.cbc_rs.scheelite_ore": "白钨矿",
+  "block.cbc_rs.wolframite_ore": "黑钨矿",
+  "item.cbc_rs.raw_scheelite": "粗白钨",
+  "item.cbc_rs.raw_wolframite": "粗黑钨",
+  "item.cbc_rs.tungsten_nugget": "钨粒",
+  "item.cbc_rs.crushed_raw_scheelite": "粉碎白钨矿",
+  "item.cbc_rs.crushed_raw_wolframite": "粉碎黑钨矿"
+}

@@ -1,0 +1,359 @@
+// =====================================================================
+//  机械动力火炮：钢铁轰鸣 / Create Big Cannons: The Roar of Steel
+//  Phase 0 skeleton - Gradle build script (NeoForge 1.21.1)
+// =====================================================================
+//
+//  READ BEFORE BUILDING
+//
+//  Dependency strategy (two modes, both live in this file):
+//
+//  MODE A - Maven (default, needs network):
+//    NeoForge, Minecraft, Create, Registrate, Ponder and Flywheel all come
+//    from their real repositories. This is the normal mod-development setup.
+//
+//  MODE B - local jars (offline fallback):
+//    Create Big Cannons, Ritchie's Projectile Library, Sable and Aeronautics
+//    are NOT published to any public Maven, so they are always taken from
+//    `libs/`. Populate that folder with:
+//        pwsh -File ./_tools/fetch_local_libs.ps1
+//    If you also need to work fully offline, comment out the Maven block in
+//    `dependencies` and uncomment the OFFLINE block right below it.
+// =====================================================================
+
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id 'net.neoforged.moddev' version '2.0.148'
+}
+
+// ---- read gradle.properties -----------------------------------------
+def p = { String key -> project.findProperty(key) ?: '' }
+
+version = p('mod_version')
+group = p('mod_group')
+
+java {
+    toolchain.languageVersion = JavaLanguageVersion.of(21)
+    withSourcesJar()
+}
+
+// Datagen writes into src/generated/resources (see the `data` run below). That
+// directory must be part of the main source set, otherwise generated models and
+// lang entries never reach the built jar or the dev runs.
+sourceSets {
+    main {
+        resources {
+            srcDir 'src/generated/resources'
+        }
+    }
+}
+
+// ---------------------------------------------------------------------
+//  External mod jars for dev runs.
+//
+//  Mods that are not published to Maven live in libs/ and are copied into the
+//  run's `mods/` folder by the sync tasks below. That is the same mechanism a
+//  player uses, so it exercises the real loading path.
+//
+//  Why not something classpath-based: FML treats every entry of the legacy
+//  classpath as a BOOT library, so mod jars placed there load as libraries but
+//  are never registered as mods - the mod list stays empty and the mandatory
+//  dependency checks fail. The `fml.modFolders` system property is the FML dev
+//  hook for this, but its format is not a simple `modId=path` list (the comma
+//  separates entries and absolute Windows drive colons cannot be expressed), so
+//  this project uses the mods folder instead - documented and robust.
+//
+//  _tools/fetch_local_libs.ps1 populates libs/.
+// ---------------------------------------------------------------------
+ext.externalModJars = [
+        'createbigcannons'     : 'libs/createbigcannons-5.11.7+mc.1.21.1.jar',
+        'ritchiesprojectilelib': 'libs/ritchiesprojectilelib-2.1.2+mc.1.21.1-neoforge.jar',
+        'sable'                : 'libs/sable-neoforge-1.21.1-2.0.6.jar',
+        'aeronautics'          : 'libs/create-aeronautics-bundled-1.21.1-1.3.2.jar',
+]
+
+// Full (non-slim) Create jar, used only for dev runs. The compile dependency
+// uses the `slim` classifier (no nested libraries), but that artifact is not a
+// loadable mod file, so dev runs need the normal jar.
+configurations {
+    createDevRuntime {
+        canBeConsumed = false
+        canBeResolved = true
+        transitive = false
+    }
+}
+
+dependencies {
+    createDevRuntime "com.simibubi.create:create-${p('minecraft_version')}:${p('create_version')}"
+}
+
+// Resolves the Create jar from Maven (MODE A) plus the local mod jars.
+ext.externalModFiles = {
+    def files = []
+    project.ext.externalModJars.each { id, relPath ->
+        def f = project.file(relPath)
+        if (f.exists()) {
+            files << f
+        } else {
+            project.logger.warn("[{}] external mod jar missing: {} (run _tools/fetch_local_libs.ps1)",
+                    project.name, relPath)
+        }
+    }
+    try {
+        files.addAll(project.configurations.getByName('createDevRuntime').resolve())
+    } catch (Exception e) {
+        project.logger.warn("[{}] could not resolve the Create dev runtime jar: {}",
+                project.name, e.message)
+    }
+    return files
+}
+
+// Stages the external mods into the shared run directory's mods/ folder.
+// All run configurations point their gameDirectory at `run/`, so a single
+// staging task serves client, server, datagen and gametest.
+tasks.register('syncMods', Sync) {
+    description = 'Stages the external mod jars into run/mods for all dev runs.'
+    into layout.projectDirectory.dir('run/mods')
+    from(project.provider { project.ext.externalModFiles() })
+    // Remove stale jars so a removed dependency does not linger.
+    preserve {
+        include 'README.txt'
+    }
+}
+
+neoForge {
+    version = p('neo_version')
+
+    runs {
+        client {
+            client()
+            systemProperty 'neoforge.enabledGameTestNamespaces', p('mod_id')
+        }
+        server {
+            server()
+            programArgument '--nogui'
+            systemProperty 'neoforge.enabledGameTestNamespaces', p('mod_id')
+        }
+        // Datagen run. Plain data() is correct: ModDevGradle 2.0.x exposes the
+        // run types [client, data, gameTestServer, server, junit], and there is
+        // no `clientData` run type (clientData() is NeoGradle API and fails with
+        // "Trying to prepare unknown run: clientData"). The `data` run does
+        // include the client-side providers - it generates item models.
+        data {
+            data()
+            programArguments.addAll(
+                    '--mod', p('mod_id'),
+                    '--all',
+                    '--output', file('src/generated/resources/').getAbsolutePath(),
+                    '--existing', file('src/main/resources/').getAbsolutePath())
+        }
+        // GameTest server run: executes the @GameTest methods in
+        // src/main/java/com/cbcrs/gametest and exits non-zero if any fail.
+        gameTestServer {
+            type = "gameTestServer"
+            systemProperty 'neoforge.enabledGameTestNamespaces', p('mod_id')
+        }
+        configureEach {
+            systemProperty 'forge.logging.markers', 'REGISTRIES'
+            // One shared game directory for every run, so a single syncMods task
+            // can supply the external mods and worlds/configs are reused.
+            gameDirectory = project.file('run')
+        }
+    }
+
+    mods {
+        "${p('mod_id')}" {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+// ---- repositories ---------------------------------------------------
+repositories {
+    mavenCentral()
+    maven { name = 'NeoForged'; url = 'https://maven.neoforged.net/releases' }
+    maven { name = 'BlameJared'; url = 'https://maven.blamejared.com' }   // JEI
+    maven { name = 'Create'; url = 'https://maven.createmod.net' }        // Create, Ponder, Flywheel
+    maven { name = 'tterrag'; url = 'https://maven.tterrag.com' }         // Registrate
+
+    // --- workspace workaround: local jars, no network ------------------
+    flatDir { dirs 'libs' }
+    // ------------------------------------------------------------------
+}
+
+// ---- dependencies ---------------------------------------------------
+dependencies {
+    // =================================================================
+    //  MODE A - Maven resolution for everything that IS published.
+    //  To go fully offline, comment this whole block out and uncomment
+    //  MODE B below (libs/ must then contain the libraries as well).
+    // =================================================================
+    // `slim` is a Maven CLASSIFIER, not part of the artifactId, so it must be
+    // requested through an artifact selector rather than appended to the
+    // coordinate (appending it yields "6.0.10-281-slim", which does not exist).
+    compileOnly("com.simibubi.create:create-${p('minecraft_version')}:${p('create_version')}") {
+        artifact { classifier = 'slim' }
+    }
+    compileOnly "com.tterrag.registrate:Registrate:${p('registrate_version')}"
+    compileOnly "net.createmod.ponder:ponder-neoforge:${p('ponder_version')}"
+    compileOnly "dev.engine-room.flywheel:flywheel-neoforge-api-${p('minecraft_version')}:${p('flywheel_version')}"
+
+    // Dev runtime: Flywheel / Ponder / Registrate ship inside Create's
+    // META-INF/jarjar/, so they must NOT be duplicated on the classpath (that
+    // creates duplicate JPMS modules and breaks the ModuleLayer). Create itself
+    // is staged into <gameDir>/mods by the sync*Mods tasks instead.
+    // Nothing is added to additionalRuntimeClasspath on purpose.
+
+    // =================================================================
+    //  MODE B - offline fallback. Uncomment together with commenting out
+    //  MODE A. These three jars are the exact libraries Create 6.0.10-281
+    //  bundles in META-INF/jarjar/, extracted into libs/ by
+    //  _tools/fetch_local_libs.ps1.
+    // =================================================================
+    // compileOnly files('libs/create-1.21.1-6.0.10.jar')
+    // compileOnly files('libs/Registrate-MC1.21-1.3.0+67.jar')
+    // compileOnly files('libs/ponder-neoforge-1.0.82+mc1.21.1.jar')
+    // compileOnly files('libs/flywheel-neoforge-1.21.1-1.0.6.jar')
+    // additionalRuntimeClasspath files('libs/create-1.21.1-6.0.10.jar')
+    // additionalRuntimeClasspath files('libs/Registrate-MC1.21-1.3.0+67.jar')
+    // additionalRuntimeClasspath files('libs/ponder-neoforge-1.0.82+mc1.21.1.jar')
+    // additionalRuntimeClasspath files('libs/flywheel-neoforge-1.21.1-1.0.6.jar')
+
+    // =================================================================
+    //  Dev-run mods are staged into <gameDir>/mods by the sync*Mods tasks
+    //  (see `externalModFiles`). They are deliberately NOT added to
+    //  additionalRuntimeClasspath: Flywheel and Ponder also ship inside
+    //  Create's META-INF/jarjar/, so having them on the classpath as well
+    //  produces duplicate JPMS modules and the run dies with
+    //        ResolutionException: modules ... and ... export package ...
+    //  Compile-time access still comes from the compileOnly entries above.
+    // =================================================================
+    compileOnly files('libs/createbigcannons-5.11.7+mc.1.21.1.jar')
+    compileOnly files('libs/ritchiesprojectilelib-2.1.2+mc.1.21.1-neoforge.jar')
+    compileOnly files('libs/sable-neoforge-1.21.1-2.0.6.jar')
+    compileOnly files('libs/create-aeronautics-bundled-1.21.1-1.3.2.jar')
+}
+
+// ---------------------------------------------------------------------
+//  (externalModJars / buildModFolders / modFoldersValue are defined near the
+//   top of this file, before the neoForge block that consumes them.)
+// ---------------------------------------------------------------------
+
+// =====================================================================
+//  WORKAROUND - legacy classpath line endings
+//
+//  On Windows, Gradle / ModDevGradle writes build/moddev/<run>LegacyClasspath.txt
+//  with CRLF line endings, but NeoForge's loader reads that file with
+//  Kotlin readLines() and treats each line as a complete path. Every line
+//  therefore keeps a trailing '\r', no jar path resolves, and FML loads NONE of
+//  the mods - the run then fails with "create is not installed" even though the
+//  jar is listed in the file.
+//
+//  Rewriting the file with LF endings fixes it. This is a host-platform issue,
+//  not a mistake in the dependency setup, so it must not be "fixed" by editing
+//  the dependencies. Remove this block if ModDevGradle/NeoForge start emitting
+//  and reading the file consistently.
+// =====================================================================
+tasks.withType(org.gradle.api.DefaultTask).configureEach {
+    if (name in ['writeClientLegacyClasspath', 'writeServerLegacyClasspath', 'writeDataLegacyClasspath']) {
+        doLast {
+            outputs.files.each { f ->
+                if (f.name.endsWith('LegacyClasspath.txt') && f.exists()) {
+                    def normalized = f.getText('UTF-8').replace('\r\n', '\n')
+                    f.setText(normalized, 'UTF-8')
+                    logger.lifecycle("Normalized line endings (CRLF -> LF) in ${f.name}")
+                }
+            }
+        }
+    }
+}
+
+// Stage external mods into run/mods before any run configuration launches.
+tasks.matching { it.name in ['runServer', 'runClient', 'runData', 'runGameTestServer'] }
+        .configureEach { dependsOn 'syncMods' }
+
+// ---- jar manifest ---------------------------------------------------
+tasks.named('jar', Jar).configure {
+    manifest {
+        attributes([
+                'Specification-Title'   : p('mod_id'),
+                'Specification-Vendor'  : p('mod_authors') ?: 'cbcrs',
+                'Specification-Version' : '1',
+                'Implementation-Title'  : project.name,
+                'Implementation-Version': project.version,
+                'Implementation-Vendor' : p('mod_authors') ?: 'cbcrs',
+        ])
+    }
+}
+
+// ---- expand mods.toml / mixins.json into the built resources --------
+tasks.withType(ProcessResources).configureEach {
+    // src/main/resources and src/generated/resources can legitimately contain the
+    // same path (datagen regenerates lang files that also exist by hand). Keep
+    // both copies instead of failing the build; whichever is present wins.
+    duplicatesStrategy = DuplicatesStrategy.INCLUDE
+
+    // UTF-8 for anything that is copied verbatim (lang files, tag JSON).
+    //
+    // KNOWN LIMITATION: Gradle's template expansion (expand/filter) reads the
+    // template with the platform default charset on this kind of setup, so
+    // non-ASCII text inside an expanded template gets mangled into mojibake in
+    // the built jar. filteringCharset and -Dfile.encoding=UTF-8 do NOT fix it.
+    // That is why META-INF/neoforge.mods.toml is kept ASCII-only and every
+    // localized string lives in assets/cbc_rs/lang/. Do not put non-ASCII text
+    // into a file that goes through expand() here.
+    filteringCharset = 'UTF-8'
+
+    def expandProps = [
+            mod_id                    : p('mod_id'),
+            mod_name                  : p('mod_name'),
+            mod_name_zh               : p('mod_name_zh'),
+            mod_license               : p('mod_license'),
+            mod_version               : p('mod_version'),
+            mod_authors               : p('mod_authors'),
+            mod_description           : p('mod_description'),
+            mod_issues                : p('mod_issues'),
+            mod_group                 : p('mod_group'),
+            minecraft_version         : p('minecraft_version'),
+            minecraft_version_range   : p('minecraft_version_range'),
+            neo_version               : p('neo_version'),
+            neo_version_range         : p('neo_version_range'),
+            loader_version_range      : p('loader_version_range'),
+            create_version_range      : p('create_version_range'),
+            rpl_version_range         : p('rpl_version_range'),
+            cbc_version_range         : p('cbc_version_range'),
+            sable_version_range       : p('sable_version_range'),
+            aeronautics_version_range : p('aeronautics_version_range'),
+            simulated_version_range   : p('simulated_version_range'),
+            offroad_version_range     : p('offroad_version_range'),
+            copycats_version_range    : p('copycats_version_range'),
+            framedblocks_version_range: p('framedblocks_version_range'),
+            curios_version_range      : p('curios_version_range'),
+    ]
+
+    inputs.properties(expandProps)
+    filesMatching(['META-INF/neoforge.mods.toml']) {
+        expand expandProps
+    }
+    filesMatching(['**/*.mixins.json']) {
+        expand expandProps
+    }
+}
+
+// ---- reproducible archives ------------------------------------------
+tasks.withType(AbstractArchiveTask).configureEach {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+// ---- local publishing (for a future multi-project setup) -------------
+publishing {
+    publications {
+        register('mavenJava', MavenPublication) {
+            from components.java
+        }
+    }
+    repositories {
+        maven { url "file://${project.projectDir}/repo" }
+    }
+}

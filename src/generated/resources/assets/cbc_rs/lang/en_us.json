@@ -1,0 +1,15 @@
+{
+  "block.cbc_rs.scheelite_ore": "Scheelite Ore",
+  "block.cbc_rs.wolframite_ore": "Wolframite Ore",
+  "cbc_rs.tooltip.caliber.large": "Large Caliber",
+  "cbc_rs.tooltip.caliber.medium": "Medium Caliber",
+  "cbc_rs.tooltip.caliber.small": "Small Caliber",
+  "cbc_rs.tooltip.spread_reducer": "Reduces spread only; does not affect chamber pressure.",
+  "item.cbc_rs.crushed_raw_scheelite": "Crushed Scheelite",
+  "item.cbc_rs.crushed_raw_wolframite": "Crushed Wolframite",
+  "item.cbc_rs.raw_scheelite": "Raw Scheelite",
+  "item.cbc_rs.raw_wolframite": "Raw Wolframite",
+  "item.cbc_rs.tungsten_ingot": "Tungsten Ingot",
+  "item.cbc_rs.tungsten_nugget": "Tungsten Nugget",
+  "itemGroup.cbc_rs": "Create Big Cannons: The Roar of Steel"
+}
