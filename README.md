@@ -44,7 +44,8 @@ An addon for **Create Big Cannons 5.11.7** on **Minecraft 1.21.1 / NeoForge 21.1
 | Display name (en) | Create Big Cannons: The Roar of Steel |
 | modId | `createbigcannons_theroarofsteel` |
 | Resource / data namespace | `cbc_rs` |
-| Base package | `com.cbcrs` |
+| Base package | `com.cbcrs.wouffengard` |
+| Author | Wouffengard |
 | mod version | 0.1.0 |
 
 ### Content currently in the jar

@@ -1,8 +1,8 @@
-package com.cbcrs.index;
+package com.cbcrs.wouffengard.index;
 
-import com.cbcrs.CBSReference;
-import com.cbcrs.TheRoarOfSteel;
-import com.cbcrs.TheRoarOfSteelRegistrate;
+import com.cbcrs.wouffengard.CBSReference;
+import com.cbcrs.wouffengard.TheRoarOfSteel;
+import com.cbcrs.wouffengard.TheRoarOfSteelRegistrate;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;

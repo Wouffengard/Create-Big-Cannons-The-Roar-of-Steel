@@ -11,7 +11,7 @@
  *   <li>Block states and models for the tungsten steel barrels and breeches
  *       (feasibility report, design decision 5).</li>
  *   <li>Block and item tags, including the caliber tags declared in
- *       {@link com.cbcrs.index.CBSTags}.</li>
+ *       {@link com.cbcrs.wouffengard.index.CBSTags}.</li>
  *   <li>Recipes: pressing, melting, casting and boring for the new cannon cast
  *       moulds (design decision 6).</li>
  *   <li>Loot tables, including the boring scrap drop (report item 28).</li>
@@ -19,4 +19,4 @@
  *       Chinese-first.</li>
  * </ol>
  */
-package com.cbcrs.datagen;
+package com.cbcrs.wouffengard.datagen;

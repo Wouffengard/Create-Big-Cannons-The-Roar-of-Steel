@@ -1,8 +1,8 @@
-package com.cbcrs;
+package com.cbcrs.wouffengard;
 
 import com.mojang.logging.LogUtils;
-import com.cbcrs.gametest.CBSGameTests;
-import com.cbcrs.index.CBSIndex;
+import com.cbcrs.wouffengard.gametest.CBSGameTests;
+import com.cbcrs.wouffengard.index.CBSIndex;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.fml.ModContainer;

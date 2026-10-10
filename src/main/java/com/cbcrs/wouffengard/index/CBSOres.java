@@ -1,6 +1,6 @@
-package com.cbcrs.index;
+package com.cbcrs.wouffengard.index;
 
-import com.cbcrs.TheRoarOfSteelRegistrate;
+import com.cbcrs.wouffengard.TheRoarOfSteelRegistrate;
 import com.tterrag.registrate.providers.loot.RegistrateBlockLootTables;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;

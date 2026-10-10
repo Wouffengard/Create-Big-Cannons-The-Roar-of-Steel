@@ -1,9 +1,9 @@
-package com.cbcrs.gametest;
+package com.cbcrs.wouffengard.gametest;
 
-import com.cbcrs.TheRoarOfSteel;
-import com.cbcrs.index.CBSItems;
-import com.cbcrs.index.CBSMaterials;
-import com.cbcrs.index.CBSOres;
+import com.cbcrs.wouffengard.TheRoarOfSteel;
+import com.cbcrs.wouffengard.index.CBSItems;
+import com.cbcrs.wouffengard.index.CBSMaterials;
+import com.cbcrs.wouffengard.index.CBSOres;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;

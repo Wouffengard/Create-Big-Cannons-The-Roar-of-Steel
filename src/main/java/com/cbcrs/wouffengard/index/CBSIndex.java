@@ -1,4 +1,4 @@
-package com.cbcrs.index;
+package com.cbcrs.wouffengard.index;
 
 import net.neoforged.bus.api.IEventBus;
 

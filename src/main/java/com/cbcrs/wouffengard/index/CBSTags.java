@@ -1,6 +1,6 @@
-package com.cbcrs.index;
+package com.cbcrs.wouffengard.index;
 
-import com.cbcrs.CBSReference;
+import com.cbcrs.wouffengard.CBSReference;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;

@@ -18,4 +18,4 @@
  *       common one.</li>
  * </ul>
  */
-package com.cbcrs.mixin;
+package com.cbcrs.wouffengard.mixin;

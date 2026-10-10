@@ -1,7 +1,7 @@
-package com.cbcrs.index;
+package com.cbcrs.wouffengard.index;
 
-import com.cbcrs.TheRoarOfSteel;
-import com.cbcrs.TheRoarOfSteelRegistrate;
+import com.cbcrs.wouffengard.TheRoarOfSteel;
+import com.cbcrs.wouffengard.TheRoarOfSteelRegistrate;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;

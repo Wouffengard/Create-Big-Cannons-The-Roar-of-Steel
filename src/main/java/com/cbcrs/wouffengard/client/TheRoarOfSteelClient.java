@@ -1,9 +1,9 @@
-package com.cbcrs.client;
+package com.cbcrs.wouffengard.client;
 
-import com.cbcrs.TheRoarOfSteel;
-import com.cbcrs.index.CBSItems;
-import com.cbcrs.index.CBSMaterials;
-import com.cbcrs.index.CBSOres;
+import com.cbcrs.wouffengard.TheRoarOfSteel;
+import com.cbcrs.wouffengard.index.CBSItems;
+import com.cbcrs.wouffengard.index.CBSMaterials;
+import com.cbcrs.wouffengard.index.CBSOres;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;

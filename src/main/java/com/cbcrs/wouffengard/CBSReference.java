@@ -1,4 +1,4 @@
-package com.cbcrs;
+package com.cbcrs.wouffengard;
 
 import net.minecraft.resources.ResourceLocation;
 

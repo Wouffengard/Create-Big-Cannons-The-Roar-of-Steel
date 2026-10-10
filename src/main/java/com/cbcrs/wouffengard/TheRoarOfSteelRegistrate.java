@@ -1,4 +1,4 @@
-package com.cbcrs;
+package com.cbcrs.wouffengard;
 
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import net.neoforged.bus.api.IEventBus;

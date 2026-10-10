@@ -1,6 +1,6 @@
-package com.cbcrs.gametest;
+package com.cbcrs.wouffengard.gametest;
 
-import com.cbcrs.TheRoarOfSteel;
+import com.cbcrs.wouffengard.TheRoarOfSteel;
 import net.minecraft.gametest.framework.GameTestRegistry;
 import net.neoforged.bus.api.IEventBus;
 
