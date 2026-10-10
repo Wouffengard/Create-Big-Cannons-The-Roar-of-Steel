@@ -29,6 +29,14 @@ libs/*.jar
 # shipped in the jar), but this cache is pure build state.
 src/generated/resources/.cache/
 
+# Local build tooling: convenience scripts, not part of the distributed mod.
+# Leading slash anchors this to the repository root so a nested _tools/ inside
+# src/ would still be tracked.
+/_tools/
+
+# Development log: kept locally, intentionally not published.
+/CHANGELOG.dev.md
+
 # OS
 .DS_Store
 Thumbs.db
