@@ -3,36 +3,67 @@
 
 An addon for **Create Big Cannons 5.11.7** on **Minecraft 1.21.1 / NeoForge 21.1.228**.
 
-> **Status: Phase 1 - the tungsten ingot exists and is verified in-game.**
-> Phase 0 established the build, registration plumbing, namespace policy and
-> caliber tag skeleton. Phase 1 adds the mod's first item: the tungsten ingot
-> (feasibility report item 26), the root of the tungsten steel material chain.
-> The feature roadmap and per-item feasibility conclusions live in
-> `机械动力火炮附属开发大纲_可行性报告_v4.docx` in the workspace root.
+> **Status: the complete tungsten ore-to-metal chain is in place and verified in game.**
+> Phase 0 established the build, registration plumbing, namespace policy and the
+> caliber tag skeleton. The tungsten phase (feasibility report decisions 15-17,
+> items 23-26) then added the two tungsten ores, their raw and crushed
+> intermediates, the tungsten nugget, ore world generation, ore loot tables and
+> every melting and mechanical-processing recipe.
+> The feature roadmap, the locked design decisions and the per-item feasibility
+> conclusions live in `机械动力火炮附属开发大纲-开发任务报告.docx` in the workspace
+> root (revision 9).
+>
+> Content: 8 entries - `scheelite_ore`, `wolframite_ore`, `raw_scheelite`,
+> `raw_wolframite`, `crushed_raw_scheelite`, `crushed_raw_wolframite`,
+> `tungsten_ingot`, `tungsten_nugget`. See section 1 for the table.
 >
 > Verified on this machine:
 >
-> * `gradlew build` succeeds and produces a jar with the expanded
->   `neoforge.mods.toml`, the item model, both lang files and the texture.
-> * `gradlew runData` generates `models/item/tungsten_ingot.json` and the
->   en_us/en_ud lang entries from Registrate.
-> * `gradlew runServer` reaches `Done (0.709s)!` with this addon plus Create
->   6.0.10, Create Big Cannons 5.11.7, Ritchie's Projectile Library 2.1.2,
->   Sable 2.0.6 and Create Aeronautics 1.3.2 (incl. Simulated / Offroad / Veil)
->   all loaded.
-> * `gradlew runGameTestServer` reports **All 3 required tests passed**, proving
->   the item is registered under `cbc_rs:tungsten_ingot`, is the same instance
->   the code references, and produces a valid ItemStack.
-> * `gradlew runClient` starts with all 15 mods loaded and logs three
->   `ASSET OK` lines (texture resource found, model baked with 26 quads, pixel
->   fingerprint matching the source PNG byte-for-byte). Zero errors and zero
->   warnings were emitted by this mod. The item was then inspected by eye in the
->   creative tab and rendered correctly. Exact numbers and hashes are recorded in
->   [TESTING.md](TESTING.md) section 4.
+> * `gradlew clean build runData` succeeds. The jar carries the expanded
+>   `neoforge.mods.toml` (with the declared author), all models and blockstates,
+>   both lang files, the textures, 20 recipes, 6 worldgen files, 2 biome
+>   modifiers and the ore loot tables.
+> * `gradlew runServer` and `gradlew runClient` both come up with Create 6.0.10,
+>   Create Big Cannons 5.11.7, Ritchie's Projectile Library 2.1.2, Sable 2.0.6
+>   and Create Aeronautics 1.3.2 (incl. Simulated / Offroad / Veil) loaded.
+> * `gradlew runGameTestServer` reports **All 12 required tests passed**: item and
+>   block registration, block items, stacking, the single-tungsten-ingot rule,
+>   all three loot behaviours (no enchantment / Silk Touch / Fortune sampled over
+>   200 rolls against a vanilla iron-ore control), worldgen registration, recipe
+>   loading and the nugget-to-ingot round trip.
+> * `gradlew runClient` logs `ASSET SUMMARY textures: 8 present, 0 missing` and
+>   `models: 8 ok, 0 failed`, and loads `3111 recipes` (3091 baseline + 20 ours).
+>   The content was inspected by eye in the creative tab and renders correctly.
+> * The offline structural self-check `_tools/verify_scaffold.py` reports 267
+>   assertions passing.
+>
+> Numbers, hashes and the recorded baselines are in [TESTING.md](TESTING.md);
+> the Chinese development log is `CHANGELOG.dev.md`.
 
 > **Testing:** see [TESTING.md](TESTING.md) for the rendering/item test
 > procedure, the success criteria, the recorded baseline, and the known
 > compatibility noise that must not be misdiagnosed as a regression.
+
+> **Commit policy - new content is not committed as it is written.**
+> Every addition stays uncommitted until all three of these are done:
+>
+> 1. it has been **manually tested in game**,
+> 2. it has been **adjusted** according to what that test showed, and
+> 3. it has been **written into the changelog** (`CHANGELOG.dev.md`).
+>
+> Only then, and only after **explicit confirmation from the user**, is a single
+> commit made covering that batch of work. Commits are therefore coarse, deliberate
+> checkpoints rather than a running log - do not commit new content on the
+> assumption that it will be refined later.
+>
+> Whether new content is pushed follows the same rule: no commit, no push.
+>
+> Note that `CHANGELOG.dev.md` is gitignored but **not** optional - because the
+> changelog is part of the gate, it must be current before the commit is made even
+> though the file itself is not part of the repository. It lives on disk only.
+
+> **Not to be committed yet (awaiting the above):** the tungsten steel and
+> tungsten alloy material series currently in progress.
 
 ---
 
