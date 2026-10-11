@@ -1,0 +1,15 @@
+{
+  "type": "create:compacting",
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "amount": 90,
+      "fluid": "cbc_rs:molten_tungsten_steel"
+    }
+  ],
+  "results": [
+    {
+      "id": "cbc_rs:tungsten_steel_ingot"
+    }
+  ]
+}

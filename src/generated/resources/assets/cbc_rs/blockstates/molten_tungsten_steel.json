@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "cbc_rs:block/molten_tungsten_steel"
+    }
+  }
+}

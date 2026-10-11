@@ -4,6 +4,8 @@ import com.cbcrs.wouffengard.TheRoarOfSteel;
 import com.cbcrs.wouffengard.index.CBSItems;
 import com.cbcrs.wouffengard.index.CBSMaterials;
 import com.cbcrs.wouffengard.index.CBSOres;
+import com.cbcrs.wouffengard.index.CBSTungstenSteel;
+import com.cbcrs.wouffengard.index.CBSTungstenSteelFluids;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.block.model.BakedQuad;
 import net.minecraft.client.resources.model.BakedModel;
@@ -62,7 +64,24 @@ public final class TheRoarOfSteelClient {
         // ultimately references the block texture.
         CONTENT.put("scheelite_ore", "block");
         CONTENT.put("wolframite_ore", "block");
+        CONTENT.put("tungsten_steel_ingot", "item");
+        CONTENT.put("tungsten_alloy_billet", "item");
+        CONTENT.put("tungsten_alloy_ingot", "item");
+        // Fluid bucket item; its icon is item/molten_tungsten_steel_bucket.png
+        CONTENT.put("molten_tungsten_steel_bucket", "item");
     }
+
+    /**
+     * Fluid textures, checked as raw resources rather than through an item.
+     *
+     * <p>A fluid has no item to bake a model for (no bucket is registered), so
+     * these are only verified to exist on disk. The animated still/flow pair is
+     * referenced by the FluidType and would otherwise fail silently into the
+     * missing-texture sprite.
+     */
+    private static final List<String> FLUID_TEXTURES = List.of(
+            "textures/fluid/molten_tungsten_steel_still.png",
+            "textures/fluid/molten_tungsten_steel_flow.png");
 
     private static boolean textureChecked = false;
     private static boolean modelCheckPending = false;
@@ -107,6 +126,28 @@ public final class TheRoarOfSteelClient {
         }
         TheRoarOfSteel.LOGGER.info("[{}] ASSET SUMMARY textures: {} present, {} missing",
                 TheRoarOfSteel.MOD_ID, ok, missing);
+
+        // Fluid textures: existence only, and reported separately so a fluid
+        // problem cannot masquerade as an item problem.
+        int fluidOk = 0;
+        int fluidMissing = 0;
+        for (String path : FLUID_TEXTURES) {
+            ResourceLocation tex = ResourceLocation.fromNamespaceAndPath(
+                    TheRoarOfSteel.NAMESPACE, path);
+            if (minecraft.getResourceManager().getResource(tex).isPresent()) {
+                fluidOk++;
+                TheRoarOfSteel.LOGGER.info("[{}] ASSET OK   fluid texture found: {}",
+                        TheRoarOfSteel.MOD_ID, tex);
+            } else {
+                fluidMissing++;
+                TheRoarOfSteel.LOGGER.error("[{}] ASSET FAIL fluid texture MISSING: {}",
+                        TheRoarOfSteel.MOD_ID, tex);
+            }
+        }
+        TheRoarOfSteel.LOGGER.info(
+                "[{}] ASSET SUMMARY fluid textures: {} present, {} missing",
+                TheRoarOfSteel.MOD_ID, fluidOk, fluidMissing);
+
         modelCheckPending = true;
         modelCheckDelay = 20;
     }
@@ -210,6 +251,11 @@ public final class TheRoarOfSteelClient {
         m.put("crushed_raw_wolframite", CBSMaterials.CRUSHED_RAW_WOLFRAMITE.get());
         m.put("scheelite_ore", CBSOres.SCHEELITE_ORE.get().asItem());
         m.put("wolframite_ore", CBSOres.WOLFRAMITE_ORE.get().asItem());
+        m.put("tungsten_steel_ingot", CBSTungstenSteel.TUNGSTEN_STEEL_INGOT.get());
+        m.put("tungsten_alloy_billet", CBSTungstenSteel.TUNGSTEN_ALLOY_BILLET.get());
+        m.put("tungsten_alloy_ingot", CBSTungstenSteel.TUNGSTEN_ALLOY_INGOT.get());
+        CBSTungstenSteelFluids.MOLTEN_TUNGSTEN_STEEL.getBucket()
+                .ifPresent(bucket -> m.put("molten_tungsten_steel_bucket", bucket));
         return m;
     }
 }

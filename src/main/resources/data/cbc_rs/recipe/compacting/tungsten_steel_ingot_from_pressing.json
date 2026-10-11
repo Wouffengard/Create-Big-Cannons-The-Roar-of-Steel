@@ -1,0 +1,18 @@
+{
+  "type": "create:compacting",
+  "heat_requirement": "superheated",
+  "ingredients": [
+    {
+      "tag": "c:ingots/tungsten"
+    },
+    {
+      "tag": "c:ingots/steel"
+    }
+  ],
+  "processing_time": 200,
+  "results": [
+    {
+      "id": "cbc_rs:tungsten_steel_ingot"
+    }
+  ]
+}

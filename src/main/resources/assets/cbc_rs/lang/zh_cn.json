@@ -11,5 +11,11 @@
   "item.cbc_rs.raw_wolframite": "粗黑钨",
   "item.cbc_rs.tungsten_nugget": "钨粒",
   "item.cbc_rs.crushed_raw_scheelite": "粉碎白钨矿",
-  "item.cbc_rs.crushed_raw_wolframite": "粉碎黑钨矿"
+  "item.cbc_rs.crushed_raw_wolframite": "粉碎黑钨矿",
+  "item.cbc_rs.tungsten_steel_ingot": "钨钢锭",
+  "item.cbc_rs.tungsten_alloy_billet": "钨合金坯料",
+  "item.cbc_rs.tungsten_alloy_ingot": "钨合金锭",
+  "block.cbc_rs.molten_tungsten_steel": "熔融钨钢",
+  "fluid.cbc_rs.molten_tungsten_steel": "熔融钨钢",
+  "item.cbc_rs.molten_tungsten_steel_bucket": "熔融钨钢桶"
 }

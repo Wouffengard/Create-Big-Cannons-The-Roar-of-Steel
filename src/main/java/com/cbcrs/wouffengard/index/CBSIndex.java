@@ -36,8 +36,14 @@ public final class CBSIndex {
         // Raw / crushed tungsten plus the tungsten nugget (decisions 15/16).
         CBSMaterials.register();
 
+        // Molten tungsten steel. The fluid is registered before the solids that
+        // are cast from it, because a fluid creates its own LiquidBlock.
+        CBSTungstenSteelFluids.register();
+
+        // Tungsten steel and tungsten alloy solids (the ordnance materials).
+        CBSTungstenSteel.register();
+
         // Later phases, in dependency order:
-        //   CBSFluids.register();
         //   CBSBlockEntities.register();
         //   CBSMenus.register();
     }

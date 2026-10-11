@@ -63,9 +63,13 @@ public final class CBSTabs {
      * binding) so the tab's contents are obvious from the source. The order
      * below mirrors the processing chain, which makes the tab readable:
      * ores, then raw ore, then crushed ore, then the metal items.
+     *
+     * <p>Public so the game test can drive it directly and assert that nothing
+     * registered was forgotten - {@code CreativeModeTab.getDisplayItems()} is
+     * empty in a dedicated server, so the test cannot inspect a baked tab.
      */
-    private static void addItems(CreativeModeTab.ItemDisplayParameters parameters,
-                                 CreativeModeTab.Output output) {
+    public static void addItems(CreativeModeTab.ItemDisplayParameters parameters,
+                                CreativeModeTab.Output output) {
         // Ores
         output.accept(CBSOres.SCHEELITE_ORE);
         output.accept(CBSOres.WOLFRAMITE_ORE);
@@ -81,6 +85,15 @@ public final class CBSTabs {
         // Metal
         output.accept(CBSItems.TUNGSTEN_INGOT);
         output.accept(CBSMaterials.TUNGSTEN_NUGGET);
+
+        // Refined ordnance materials, in processing order.
+        // The molten fluid's liquid block is deliberately absent, matching CBC:
+        // molten metals are a foundry intermediate and have no tab entry of their
+        // own. The BUCKET, however, is a real item and must be listed.
+        output.accept(CBSTungstenSteel.TUNGSTEN_STEEL_INGOT);
+        output.accept(CBSTungstenSteel.TUNGSTEN_ALLOY_BILLET);
+        output.accept(CBSTungstenSteel.TUNGSTEN_ALLOY_INGOT);
+        CBSTungstenSteelFluids.MOLTEN_TUNGSTEN_STEEL.getBucket().ifPresent(output::accept);
     }
 
     private static CreativeModeTab buildMainTab() {

@@ -4,6 +4,7 @@ import com.cbcrs.wouffengard.TheRoarOfSteel;
 import com.cbcrs.wouffengard.index.CBSItems;
 import com.cbcrs.wouffengard.index.CBSMaterials;
 import com.cbcrs.wouffengard.index.CBSOres;
+import com.cbcrs.wouffengard.index.CBSTungstenSteel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Holder;
 import net.minecraft.core.HolderLookup;
@@ -20,14 +21,23 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.ItemEnchantments;
+import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.crafting.SizedFluidIngredient;
+import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Block;
+import com.simibubi.create.content.kinetics.mixer.CompactingRecipe;
+import com.simibubi.create.content.kinetics.mixer.MixingRecipe;
+import com.simibubi.create.content.processing.recipe.HeatCondition;
+import com.simibubi.create.content.processing.recipe.ProcessingRecipe;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
 
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 /**
  * In-game verification for the tungsten content.
@@ -149,19 +159,38 @@ public final class TungstenIngotGameTests {
     /**
      * Guards the design rule from decision 16: exactly one tungsten ingot must
      * exist, so both ore chains converge instead of producing two metals.
+     *
+     * <p>The predicate is deliberately an exact id match, not a substring test.
+     * A substring test on "tungsten" + "ingot" also matches the refined
+     * materials (tungsten_steel_ingot, tungsten_alloy_ingot), which are
+     * different substances and are supposed to exist. What must not exist is a
+     * second plain tungsten ingot, e.g. a duplicate registered under another
+     * name by a later phase.
      */
     @GameTest(templateNamespace = TheRoarOfSteel.NAMESPACE, template = "empty", timeoutTicks = 100)
     public static void exactlyOneTungstenIngotExists(GameTestHelper helper) {
-        int found = 0;
+        // Any item whose id ends in "ingot" and mentions tungsten, but which is
+        // NOT one of the two deliberately distinct refined grades.
+        Set<String> permittedExtraIngots = Set.of(
+                "tungsten_steel_ingot",   // decision 17 material chain
+                "tungsten_alloy_ingot");  // decision 17 material chain
+
+        Set<String> plainTungstenIngots = new java.util.LinkedHashSet<>();
         for (ResourceLocation id : BuiltInRegistries.ITEM.keySet()) {
             String path = id.getPath();
-            if (path.contains("tungsten") && path.contains("ingot")) {
-                found++;
+            if (!path.contains("tungsten") || !path.contains("ingot")) {
+                continue;
             }
+            if (permittedExtraIngots.contains(path)) {
+                continue;
+            }
+            plainTungstenIngots.add(path);
         }
-        if (found != 1) {
-            helper.fail("Expected exactly one tungsten ingot item, found " + found
-                    + " (design decision 16 forbids a second ingot)");
+
+        if (plainTungstenIngots.size() != 1
+                || !plainTungstenIngots.contains("tungsten_ingot")) {
+            helper.fail("Expected exactly one plain tungsten ingot, found "
+                    + plainTungstenIngots + " (design decision 16 forbids a second)");
             return;
         }
         helper.succeed();
@@ -302,7 +331,7 @@ public final class TungstenIngotGameTests {
             }
         }
         // 6 smelting + 6 blasting + 4 crushing + 2 splashing + 2 crafting = 20
-        int expected = 20;
+        int expected = 25;
         if (ours != expected) {
             helper.fail("Expected " + expected + " recipes under "
                     + TheRoarOfSteel.NAMESPACE + " but found " + ours);
@@ -310,8 +339,9 @@ public final class TungstenIngotGameTests {
         }
 
         // Measured baseline: an unmodified instance loaded 3091 recipes, so every
-        // one of ours is present when the total is 3111. A file that silently
-        // failed to parse would drop this number and be caught here.
+        // one of ours is present when the total is 3091 + expected (3126 at 25).
+        // A file that silently failed to parse would drop this number and be
+        // caught here.
         int total = manager.getRecipes().size();
         if (total < 3091 + expected) {
             helper.fail("Total recipe count is " + total + ", expected at least "
@@ -329,7 +359,14 @@ public final class TungstenIngotGameTests {
                 "crushing/raw_scheelite", "crushing/raw_wolframite",
                 "splashing/crushed_raw_scheelite", "splashing/crushed_raw_wolframite",
                 "smelting/tungsten_ingot_from_raw_scheelite",
-                "blasting/tungsten_ingot_from_crushed_wolframite"}) {
+                "blasting/tungsten_ingot_from_crushed_wolframite",
+                // 0.1.1: basin casting and heated alloying
+                "compacting/tungsten_steel_ingot",
+                "mixing/tungsten_alloy_billet",
+                // melting, super-heated pressing, fan sintering
+                "melting/molten_tungsten_steel_from_ingot",
+                "compacting/tungsten_steel_ingot_from_pressing",
+                "blasting/tungsten_alloy_ingot_from_sintering"}) {
             ResourceLocation id =
                     ResourceLocation.fromNamespaceAndPath(TheRoarOfSteel.NAMESPACE, path);
             if (manager.byKey(id).isEmpty()) {
@@ -567,5 +604,134 @@ public final class TungstenIngotGameTests {
                     .append(BuiltInRegistries.ITEM.getKey(stacks.get(i).getItem()));
         }
         return sb.append("]").toString();
+    }
+
+    /**
+     * The basin casting recipe consumes exactly one ingot's worth of molten
+     * tungsten steel and yields the tungsten steel ingot.
+     *
+     * <p>90 mB is CBC's own ingot unit (CannonCastShape.INGOT_SIZE_MB == 90), and
+     * CBC casts its own metals with a create:compacting recipe of exactly this
+     * shape. Asserting the fluid id and amount catches a copy-paste that left the
+     * fluid pointing at CBC's metal, or the amount at a whole block's worth (810).
+     */
+    @GameTest(templateNamespace = TheRoarOfSteel.NAMESPACE, template = "empty", timeoutTicks = 100)
+    public static void tungstenSteelIngotIsCastFromMoltenMetal(GameTestHelper helper) {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+                TheRoarOfSteel.NAMESPACE, "compacting/tungsten_steel_ingot");
+        var holder = helper.getLevel().getRecipeManager().byKey(id).orElse(null);
+        if (holder == null) {
+            helper.fail("Recipe not loaded: " + id);
+            return;
+        }
+        if (!(holder.value() instanceof CompactingRecipe compacting)) {
+            helper.fail("Recipe is not a create:compacting recipe: "
+                    + holder.value().getClass().getName());
+            return;
+        }
+
+        var fluids = ((ProcessingRecipe<?, ?>) compacting).getFluidIngredients();
+        if (fluids.size() != 1) {
+            helper.fail("Expected exactly 1 fluid ingredient but found " + fluids.size());
+            return;
+        }
+        SizedFluidIngredient fluid = fluids.get(0);
+        Fluid molten = BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath(
+                TheRoarOfSteel.NAMESPACE, "molten_tungsten_steel"));
+        if (!fluid.test(new FluidStack(molten, fluid.amount()))) {
+            helper.fail("The compacting recipe does not accept molten_tungsten_steel");
+            return;
+        }
+        if (fluid.amount() != 90) {
+            helper.fail("Expected 90 mB (one ingot) but the recipe wants " + fluid.amount());
+            return;
+        }
+
+        var results = ((ProcessingRecipe<?, ?>) compacting).getRollableResults();
+        if (results.isEmpty()) {
+            helper.fail("Recipe has no result");
+            return;
+        }
+        net.minecraft.world.item.Item produced = results.get(0).getStack().getItem();
+        if (produced != CBSTungstenSteel.TUNGSTEN_STEEL_INGOT.get()) {
+            helper.fail("Recipe produces " + BuiltInRegistries.ITEM.getKey(produced)
+                    + " instead of tungsten_steel_ingot");
+            return;
+        }
+        helper.succeed();
+    }
+
+    /**
+     * The alloy billet recipe is a heated mixing recipe taking molten tungsten
+     * steel plus an obsidian dust.
+     *
+     * <p>The heat requirement is the part a copy-paste is most likely to lose, so
+     * it is asserted explicitly rather than assumed from the JSON.
+     */
+    @GameTest(templateNamespace = TheRoarOfSteel.NAMESPACE, template = "empty", timeoutTicks = 100)
+    public static void tungstenAlloyBilletNeedsHeat(GameTestHelper helper) {
+        ResourceLocation id = ResourceLocation.fromNamespaceAndPath(
+                TheRoarOfSteel.NAMESPACE, "mixing/tungsten_alloy_billet");
+        var holder = helper.getLevel().getRecipeManager().byKey(id).orElse(null);
+        if (holder == null) {
+            helper.fail("Recipe not loaded: " + id);
+            return;
+        }
+        if (!(holder.value() instanceof MixingRecipe mixing)) {
+            helper.fail("Recipe is not a create:mixing recipe: "
+                    + holder.value().getClass().getName());
+            return;
+        }
+
+        // Heated (blaze burner) - the planner's requirement for this step.
+        if (mixing.getRequiredHeat() != HeatCondition.HEATED) {
+            helper.fail("Expected HEATED but the recipe requires " + mixing.getRequiredHeat()
+                    + " (a missing heat_requirement deserialises as NONE)");
+            return;
+        }
+
+        var fluids = mixing.getFluidIngredients();
+        if (fluids.size() != 1) {
+            helper.fail("Expected 1 fluid ingredient but found " + fluids.size());
+            return;
+        }
+        Fluid molten = BuiltInRegistries.FLUID.get(ResourceLocation.fromNamespaceAndPath(
+                TheRoarOfSteel.NAMESPACE, "molten_tungsten_steel"));
+        if (!fluids.get(0).test(new FluidStack(molten, fluids.get(0).amount()))) {
+            helper.fail("The mixing recipe does not accept molten_tungsten_steel");
+            return;
+        }
+        if (fluids.get(0).amount() != 90) {
+            helper.fail("Expected 90 mB of molten metal but found " + fluids.get(0).amount());
+            return;
+        }
+
+        // The item side must be the obsidian dust (Create's powdered obsidian).
+        if (mixing.getIngredients().size() != 1) {
+            helper.fail("Expected exactly 1 item ingredient (obsidian dust) but found "
+                    + mixing.getIngredients().size());
+            return;
+        }
+        net.minecraft.world.item.ItemStack dust = new net.minecraft.world.item.ItemStack(
+                net.minecraft.core.registries.BuiltInRegistries.ITEM.get(
+                        ResourceLocation.fromNamespaceAndPath("create", "powdered_obsidian")));
+        if (!mixing.getIngredients().get(0).test(dust)) {
+            helper.fail("The mixing recipe does not accept create:powdered_obsidian");
+            return;
+        }
+
+        var results = mixing.getRollableResults();
+        if (results.isEmpty()
+                || results.get(0).getStack().getItem() != CBSTungstenSteel.TUNGSTEN_ALLOY_BILLET.get()) {
+            helper.fail("Recipe does not produce tungsten_alloy_billet");
+            return;
+        }
+        // The planner asked for a processing time to be set explicitly.
+        if (mixing.getProcessingDuration() != 200) {
+            helper.fail("Expected a processing time of 200 ticks but found "
+                    + mixing.getProcessingDuration());
+            return;
+        }
+        helper.succeed();
     }
 }

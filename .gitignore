@@ -37,6 +37,11 @@ src/generated/resources/.cache/
 # Development log: kept locally, intentionally not published.
 /CHANGELOG.dev.md
 
+# Author's source art. Art is distributed inside the jar via
+# src/main/resources/assets/..., so the working copies are not versioned.
+# Leading slash anchors this to the repository root.
+/art/
+
 # OS
 .DS_Store
 Thumbs.db

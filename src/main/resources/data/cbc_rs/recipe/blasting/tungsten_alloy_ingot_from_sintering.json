@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:blasting",
+  "category": "misc",
+  "cookingtime": 200,
+  "experience": 0.35,
+  "ingredient": {
+    "item": "cbc_rs:tungsten_alloy_billet"
+  },
+  "result": {
+    "count": 1,
+    "id": "cbc_rs:tungsten_alloy_ingot"
+  }
+}

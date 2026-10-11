@@ -1,15 +1,21 @@
 {
+  "block.cbc_rs.molten_tungsten_steel": "ןǝǝʇS uǝʇsbun⟘ uǝʇןoW",
   "block.cbc_rs.scheelite_ore": "ǝɹO ǝʇıןǝǝɥɔS",
   "block.cbc_rs.wolframite_ore": "ǝɹO ǝʇıɯɐɹɟןoM",
   "cbc_rs.tooltip.caliber.large": "ɹǝqıןɐƆ ǝbɹɐꞀ",
   "cbc_rs.tooltip.caliber.medium": "ɹǝqıןɐƆ ɯnıpǝW",
   "cbc_rs.tooltip.caliber.small": "ɹǝqıןɐƆ ןןɐɯS",
   "cbc_rs.tooltip.spread_reducer": "˙ǝɹnssǝɹd ɹǝqɯɐɥɔ ʇɔǝɟɟɐ ʇou sǝop ؛ʎןuo pɐǝɹds sǝɔnpǝᴚ",
+  "fluid.cbc_rs.molten_tungsten_steel": "ןǝǝʇS uǝʇsbun⟘ uǝʇןoW",
   "item.cbc_rs.crushed_raw_scheelite": "ǝʇıןǝǝɥɔS pǝɥsnɹƆ",
   "item.cbc_rs.crushed_raw_wolframite": "ǝʇıɯɐɹɟןoM pǝɥsnɹƆ",
+  "item.cbc_rs.molten_tungsten_steel_bucket": "ʇǝʞɔnᗺ ןǝǝʇS uǝʇsbun⟘ uǝʇןoW",
   "item.cbc_rs.raw_scheelite": "ǝʇıןǝǝɥɔS ʍɐᴚ",
   "item.cbc_rs.raw_wolframite": "ǝʇıɯɐɹɟןoM ʍɐᴚ",
+  "item.cbc_rs.tungsten_alloy_billet": "ʇǝןןıᗺ ʎoןןⱯ uǝʇsbun⟘",
+  "item.cbc_rs.tungsten_alloy_ingot": "ʇobuI ʎoןןⱯ uǝʇsbun⟘",
   "item.cbc_rs.tungsten_ingot": "ʇobuI uǝʇsbun⟘",
   "item.cbc_rs.tungsten_nugget": "ʇǝbbnN uǝʇsbun⟘",
+  "item.cbc_rs.tungsten_steel_ingot": "ʇobuI ןǝǝʇS uǝʇsbun⟘",
   "itemGroup.cbc_rs": "ןǝǝʇS ɟo ɹɐoᴚ ǝɥ⟘ :suouuɐƆ bıᗺ ǝʇɐǝɹƆ"
 }

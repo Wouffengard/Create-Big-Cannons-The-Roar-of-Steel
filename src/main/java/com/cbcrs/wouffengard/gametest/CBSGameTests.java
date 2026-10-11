@@ -44,6 +44,10 @@ public final class CBSGameTests {
         TheRoarOfSteel.LOGGER.info("[{}] registered game test class {} directly",
                 TheRoarOfSteel.MOD_ID, TungstenIngotGameTests.class.getSimpleName());
 
+        GameTestRegistry.register(TungstenSteelGameTests.class);
+        TheRoarOfSteel.LOGGER.info("[{}] registered game test class {} directly",
+                TheRoarOfSteel.MOD_ID, TungstenSteelGameTests.class.getSimpleName());
+
         // Later phases append their test classes here, e.g.:
         //   GameTestRegistry.register(PropellantGameTests.class);
     }

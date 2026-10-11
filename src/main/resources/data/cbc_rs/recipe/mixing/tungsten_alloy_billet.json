@@ -1,0 +1,20 @@
+{
+  "type": "create:mixing",
+  "heat_requirement": "heated",
+  "ingredients": [
+    {
+      "type": "neoforge:single",
+      "amount": 90,
+      "fluid": "cbc_rs:molten_tungsten_steel"
+    },
+    {
+      "tag": "c:dusts/obsidian"
+    }
+  ],
+  "processing_time": 200,
+  "results": [
+    {
+      "id": "cbc_rs:tungsten_alloy_billet"
+    }
+  ]
+}
